@@ -3,770 +3,761 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Group Peer Evaluation</title>
+<title>ART104 · Peer Evaluation</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- ═══════════════════════════════════════════════════════
+     FIREBASE CONFIG — replace these values after setup
+     See SETUP_INSTRUCTIONS.txt for step-by-step guide
+     ═══════════════════════════════════════════════════════ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ▼▼▼ PASTE YOUR FIREBASE CONFIG HERE ▼▼▼
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDQusp6wSFXsFKUn4TwphBwEajY14a-usk",
+    authDomain:        "art104-group-evaluation.firebaseapp.com",
+    projectId:         "art104-group-evaluation",
+    storageBucket:     "art104-group-evaluation.firebasestorage.app",
+    messagingSenderId: "412446718143",
+    appId:             "1:412446718143:web:2affc1b6832ef67187ae0a",
+    measurementId:     "G-0L9SVV4TQP"
+  };
+  // ▲▲▲ END OF CONFIG ▲▲▲
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // Expose to window so non-module functions can use it
+  window._db            = db;
+  window._addDoc        = addDoc;
+  window._getDocs       = getDocs;
+  window._collection    = collection;
+  window._serverTimestamp = serverTimestamp;
+  window._firebaseReady = true;
+  document.dispatchEvent(new Event('firebaseReady'));
+</script>
+
 <style>
-  :root {
-    --navy: #0b2f5e;
-    --blue: #1457a0;
-    --sky: #2e86c9;
-    --light: #d6eaf8;
-    --accent: #7ec8e3;
-    --white: #ffffff;
-    --gray: #3d6b99;
-    --border: #a8cce0;
-    --success: #1457a0;
-    --text: #0a2340;
-  }
+/* ── VARIABLES ── */
+:root {
+  --navy:   #0b2f5e;
+  --blue:   #1457a0;
+  --sky:    #2e86c9;
+  --light:  #d6eaf8;
+  --accent: #7ec8e3;
+  --white:  #ffffff;
+  --gray:   #3d6b99;
+  --border: #a8cce0;
+  --text:   #0a2340;
+  --bg:     #f0f6fb;
+}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: #f0f4f9;
-    color: var(--text);
-    min-height: 100vh;
-    padding: 0 0 80px;
-  }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
 
-  .site-header {
-    background: var(--navy);
-    padding: 36px 40px 32px;
-    position: relative;
-    overflow: hidden;
-  }
-  .site-header::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 260px; height: 260px;
-    border-radius: 50%;
-    background: rgba(91,159,212,0.12);
-  }
-  .header-inner { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
-  .header-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 10px;
-  }
-  .site-header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 32px;
-    color: var(--white);
-    line-height: 1.2;
-    margin-bottom: 10px;
-  }
-  .site-header p {
-    font-size: 14px;
-    color: rgba(255,255,255,0.62);
-    font-weight: 300;
-    max-width: 480px;
-    line-height: 1.6;
-  }
+/* ── HEADER ── */
+.site-header {
+  background: var(--navy);
+  padding: 36px 40px 28px;
+  position: relative; overflow: hidden;
+}
+.site-header::before {
+  content: ''; position: absolute;
+  top: -60px; right: -60px;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: rgba(46,134,201,0.13);
+}
+.header-inner { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+.header-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+}
+.site-header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 30px; color: white; line-height: 1.2; margin-bottom: 8px;
+}
+.site-header p { font-size: 14px; color: rgba(255,255,255,0.58); font-weight: 300; line-height: 1.6; max-width: 500px; }
 
-  .setup-card {
-    max-width: 800px;
-    margin: 36px auto 0;
-    padding: 0 20px;
-  }
-  .card {
-    background: var(--white);
-    border-radius: 14px;
-    padding: 32px 36px;
-    box-shadow: 0 2px 16px rgba(26,39,68,0.07);
-  }
-  .card-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 18px;
-    color: var(--navy);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .step-dot {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--navy);
-    color: white;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
+/* ── TAB BAR ── */
+.tab-bar {
+  background: var(--navy);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex; max-width: 860px; margin: 0 auto;
+}
+.tab-btn {
+  padding: 12px 28px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.5);
+  background: none; border: none; cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  letter-spacing: 0.3px;
+}
+.tab-btn.active { color: white; border-bottom-color: var(--accent); }
+.tab-btn:hover:not(.active) { color: rgba(255,255,255,0.8); }
 
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  .field-row.full { grid-template-columns: 1fr; }
+/* ── PAGE WRAPPER ── */
+.page { display: none; max-width: 860px; margin: 0 auto; padding: 0 20px; }
+.page.active { display: block; }
 
-  label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 6px;
-  }
-  input[type="text"], select {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--text);
-    background: #f8fafd;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
-  }
-  input[type="text"]:focus, select:focus {
-    border-color: var(--sky);
-    box-shadow: 0 0 0 3px rgba(91,159,212,0.15);
-    background: white;
-  }
+/* ── CARDS ── */
+.card {
+  background: white; border-radius: 14px;
+  padding: 28px 32px; margin-top: 24px;
+  box-shadow: 0 2px 14px rgba(11,47,94,0.07);
+}
+.card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px; color: var(--navy);
+  display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+}
+.step-dot {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--navy); color: white;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
 
-  .member-names-grid { display: grid; gap: 10px; margin-top: 4px; }
-  .member-name-row { display: flex; align-items: center; gap: 10px; }
-  .member-badge {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--light);
-    border: 1.5px solid var(--border);
-    color: var(--blue);
-    font-size: 11px;
-    font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .member-name-row input { flex: 1; }
-  .you-tag {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--accent);
-    background: rgba(232,168,56,0.12);
-    border-radius: 4px;
-    padding: 2px 7px;
-    white-space: nowrap;
-  }
+/* ── INFO CARDS ── */
+.info-card {
+  background: white; border-radius: 14px;
+  padding: 22px 28px; margin-top: 20px;
+  box-shadow: 0 2px 14px rgba(11,47,94,0.07);
+  border-left: 4px solid var(--sky);
+}
+.info-card.goal { background: linear-gradient(135deg, #e4f0fb, #d6eaf8); border-left-color: var(--sky); }
+.info-card.note { background: linear-gradient(135deg, #f0f7ff, #e4f0fb); border-left-color: var(--accent); }
+.info-inner { display: flex; align-items: flex-start; gap: 14px; }
+.info-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.info-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--blue); margin-bottom: 6px;
+}
+.info-text { font-size: 14px; line-height: 1.75; color: var(--text); }
 
-  .btn-generate {
-    margin-top: 24px;
-    width: 100%;
-    padding: 14px;
-    background: var(--navy);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    letter-spacing: 0.3px;
-  }
-  .btn-generate:hover { background: var(--blue); }
+/* ── FORM FIELDS ── */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.field-row.full { grid-template-columns: 1fr; }
+label {
+  display: block; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--gray); margin-bottom: 5px;
+}
+input[type="text"], select, input[type="password"] {
+  width: 100%; padding: 10px 13px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--text); background: #f7fbff; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus {
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(46,134,201,0.15);
+  background: white;
+}
+.req { color: #b03030; }
+.required-note { font-size: 12px; color: var(--gray); margin-top: 14px; text-align: center; }
 
-  #survey-form { display: none; max-width: 800px; margin: 0 auto; padding: 0 20px; }
+/* ── MEMBER NAME INPUTS ── */
+.member-names-grid { display: grid; gap: 9px; margin-top: 4px; }
+.member-name-row { display: flex; align-items: center; gap: 10px; }
+.member-badge {
+  width: 27px; height: 27px; border-radius: 50%;
+  background: var(--light); border: 1.5px solid var(--border);
+  color: var(--blue); font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.member-name-row input { flex: 1; }
+.you-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--navy);
+  background: var(--accent); border-radius: 4px; padding: 2px 7px; white-space: nowrap;
+}
 
-  .progress-bar-wrap { margin: 28px 0 32px; }
-  .progress-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--gray);
-    margin-bottom: 8px;
-  }
-  .progress-track { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--blue), var(--sky));
-    border-radius: 99px;
-    transition: width 0.5s ease;
-  }
+/* ── BUTTONS ── */
+.btn {
+  padding: 13px 28px; border: none; border-radius: 9px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s, transform 0.1s;
+}
+.btn-primary { background: var(--navy); color: white; }
+.btn-primary:hover { background: var(--blue); }
+.btn-secondary {
+  background: white; color: var(--navy);
+  border: 2px solid var(--border);
+}
+.btn-secondary:hover { border-color: var(--sky); }
+.btn-full { width: 100%; margin-top: 20px; }
+.btn-submit { background: var(--blue); color: white; padding: 15px 48px; font-size: 15px; box-shadow: 0 4px 16px rgba(20,87,160,0.25); }
+.btn-submit:hover { background: #0f4585; }
+.btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; padding: 8px 0 16px; }
 
-  .member-section {
-    background: var(--white);
-    border-radius: 14px;
-    margin-bottom: 28px;
-    overflow: hidden;
-    box-shadow: 0 2px 16px rgba(26,39,68,0.07);
-  }
-  .member-header {
-    background: var(--navy);
-    padding: 20px 32px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .member-avatar {
-    width: 42px; height: 42px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.12);
-    border: 2px solid rgba(255,255,255,0.25);
-    color: white;
-    font-family: 'DM Serif Display', serif;
-    font-size: 18px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .member-header-text { flex: 1; }
-  .member-header-text h3 { font-family: 'DM Serif Display', serif; font-size: 20px; color: white; }
-  .member-header-text span { font-size: 12px; color: rgba(255,255,255,0.55); font-weight: 300; }
-  .self-tag {
-    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
-    text-transform: uppercase; color: var(--navy);
-    background: var(--accent); border-radius: 5px; padding: 4px 9px;
-  }
+/* ── PROGRESS ── */
+.progress-bar-wrap { margin: 24px 0 28px; }
+.progress-info {
+  display: flex; justify-content: space-between;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--gray); margin-bottom: 7px;
+}
+.progress-track { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--blue), var(--sky));
+  border-radius: 99px; transition: width 0.4s ease;
+}
 
-  .questions-body { padding: 28px 32px; }
+/* ── MEMBER SECTION ── */
+.member-section {
+  background: white; border-radius: 14px; margin-top: 22px;
+  overflow: hidden; box-shadow: 0 2px 14px rgba(11,47,94,0.07);
+}
+.member-header {
+  background: var(--navy); padding: 18px 28px;
+  display: flex; align-items: center; gap: 13px;
+}
+.member-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.22);
+  color: white; font-family: 'DM Serif Display', serif; font-size: 17px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.member-header-text { flex: 1; }
+.member-header-text h3 { font-family: 'DM Serif Display', serif; font-size: 19px; color: white; }
+.member-header-text span { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 300; }
+.self-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--navy); background: var(--accent); border-radius: 5px; padding: 3px 8px;
+}
+.questions-body { padding: 24px 28px; }
 
-  .question-block {
-    margin-bottom: 28px;
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--border);
-  }
-  .question-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+/* ── QUESTIONS ── */
+.question-block {
+  margin-bottom: 24px; padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.question-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.question-number {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--sky); margin-bottom: 4px;
+}
+.question-label { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.5; margin-bottom: 12px; }
 
-  .question-number {
-    display: inline-block;
-    font-size: 10px; font-weight: 700; letter-spacing: 1px;
-    text-transform: uppercase; color: var(--sky); margin-bottom: 5px;
-  }
-  .question-label {
-    font-size: 15px; font-weight: 500; color: var(--text);
-    line-height: 1.5; margin-bottom: 14px;
-  }
+/* ── CHOICES ── */
+.choices { display: grid; gap: 7px; }
+.choice-option {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 11px 14px; border: 1.5px solid var(--border);
+  border-radius: 9px; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.choice-option:hover { border-color: var(--sky); background: var(--light); }
+.choice-option.selected { border-color: var(--blue); background: #deedf8; }
+.choice-radio {
+  width: 17px; height: 17px; border-radius: 50%; border: 2px solid var(--border);
+  flex-shrink: 0; margin-top: 1px; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.choice-option.selected .choice-radio { border-color: var(--blue); background: var(--blue); }
+.choice-option.selected .choice-radio::after {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: white;
+}
+.choice-content { flex: 1; }
+.choice-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 1px; }
+.choice-desc { font-size: 11px; color: var(--gray); line-height: 1.4; }
+.choice-score {
+  font-size: 11px; font-weight: 700; color: var(--sky);
+  background: var(--light); border-radius: 5px; padding: 3px 7px;
+  flex-shrink: 0; align-self: center;
+}
+.choice-option.selected .choice-score { background: rgba(20,87,160,0.1); }
 
-  .choices { display: grid; gap: 8px; }
-  .choice-option {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 12px 16px; border: 1.5px solid var(--border);
-    border-radius: 9px; cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-  }
-  .choice-option:hover { border-color: var(--sky); background: var(--light); }
-  .choice-option.selected { border-color: var(--blue); background: #e8f1f9; }
-  .choice-radio {
-    width: 18px; height: 18px; border-radius: 50%;
-    border: 2px solid var(--border); flex-shrink: 0; margin-top: 1px;
-    transition: border-color 0.15s, background 0.15s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .choice-option.selected .choice-radio { border-color: var(--blue); background: var(--blue); }
-  .choice-option.selected .choice-radio::after {
-    content: ''; width: 6px; height: 6px; border-radius: 50%; background: white;
-  }
-  .choice-content { flex: 1; }
-  .choice-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-  .choice-desc { font-size: 12px; color: var(--gray); line-height: 1.4; font-weight: 300; }
-  .choice-score {
-    font-size: 11px; font-weight: 700; color: var(--sky);
-    background: var(--light); border-radius: 5px; padding: 3px 7px;
-    flex-shrink: 0; align-self: center;
-  }
-  .choice-option.selected .choice-score { background: rgba(46,92,138,0.12); }
+textarea {
+  width: 100%; padding: 11px 13px;
+  border: 1.5px solid var(--border); border-radius: 9px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--text); background: #f7fbff;
+  resize: vertical; min-height: 85px; outline: none; line-height: 1.5;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+textarea:focus {
+  border-color: var(--sky); box-shadow: 0 0 0 3px rgba(46,134,201,0.15); background: white;
+}
 
-  textarea {
-    width: 100%; padding: 12px 14px;
-    border: 1.5px solid var(--border); border-radius: 9px;
-    font-family: 'DM Sans', sans-serif; font-size: 14px;
-    color: var(--text); background: #f8fafd;
-    resize: vertical; min-height: 90px;
-    transition: border-color 0.2s, box-shadow 0.2s; outline: none; line-height: 1.5;
-  }
-  textarea:focus {
-    border-color: var(--sky);
-    box-shadow: 0 0 0 3px rgba(91,159,212,0.15);
-    background: white;
-  }
+/* ── FINAL QUESTION ── */
+.final-section {
+  background: white; border-radius: 14px; margin-top: 22px;
+  overflow: hidden; box-shadow: 0 2px 14px rgba(11,47,94,0.07);
+}
+.final-header {
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  padding: 18px 28px; display: flex; align-items: center; gap: 11px;
+}
+.final-header h3 { font-family: 'DM Serif Display', serif; font-size: 17px; color: white; }
+.final-body { padding: 22px 28px; }
 
-  .final-section {
-    background: var(--white); border-radius: 14px;
-    margin-bottom: 28px; overflow: hidden;
-    box-shadow: 0 2px 16px rgba(26,39,68,0.07);
-  }
-  .final-header {
-    background: linear-gradient(135deg, #0b2f5e, #1457a0);
-    padding: 20px 32px; display: flex; align-items: center; gap: 12px;
-  }
-  .final-header h3 { font-family: 'DM Serif Display', serif; font-size: 18px; color: white; }
-  .final-body { padding: 24px 32px; }
+/* ── RESULTS PAGE ── */
+.results-banner {
+  background: white; border-radius: 14px; padding: 28px 32px;
+  margin-top: 24px; text-align: center;
+  box-shadow: 0 2px 14px rgba(11,47,94,0.07);
+  border-top: 4px solid var(--blue);
+}
+.results-banner h2 { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--navy); margin-bottom: 6px; }
+.results-banner p { color: var(--gray); font-size: 14px; }
+.firebase-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #e8f4fb; border: 1px solid var(--border);
+  border-radius: 99px; padding: 5px 14px; margin-top: 12px;
+  font-size: 12px; font-weight: 600; color: var(--blue);
+}
 
-  .submit-wrap { text-align: center; padding: 8px 0 20px; }
-  .btn-submit {
-    padding: 16px 52px; background: var(--blue); color: white;
-    border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif;
-    font-size: 16px; font-weight: 600; cursor: pointer;
-    transition: background 0.2s; box-shadow: 0 4px 18px rgba(20,87,160,0.28);
-  }
-  .btn-submit:hover { background: #0f4585; }
+.score-card {
+  background: white; border-radius: 14px; margin-top: 18px;
+  overflow: hidden; box-shadow: 0 2px 14px rgba(11,47,94,0.07);
+}
+.score-card-header {
+  background: var(--light); padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; gap: 8px;
+}
+.score-card-name { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--navy); }
+.score-badge { padding: 5px 14px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.score-a { background: #cce0f5; color: #0b2f5e; }
+.score-b { background: #d6eaf8; color: #1457a0; }
+.score-c { background: #e8f4fd; color: #2e86c9; }
+.score-d { background: #f0f7ff; color: #3d6b99; }
+.score-breakdown {
+  padding: 16px 24px; display: grid;
+  grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.breakdown-item {
+  display: flex; justify-content: space-between;
+  align-items: center; font-size: 12px; padding: 5px 0;
+  border-bottom: 1px solid #f0f6fb;
+}
+.breakdown-label { color: var(--gray); }
+.breakdown-val { font-weight: 600; color: var(--text); }
+.total-row {
+  grid-column: 1/-1; border-bottom: none;
+  border-top: 2px solid var(--border); padding-top: 10px;
+  margin-top: 4px; font-weight: 700; font-size: 14px;
+}
+.total-row .breakdown-label { color: var(--navy); }
+.total-row .breakdown-val { color: var(--blue); font-size: 17px; }
+.comment-box {
+  padding: 0 24px 16px;
+}
+.comment-box details { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.comment-box summary {
+  padding: 9px 14px; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray);
+  cursor: pointer; background: #f7fbff; user-select: none;
+}
+.comment-box summary:hover { background: var(--light); }
+.comment-text { padding: 12px 14px; font-size: 13px; line-height: 1.6; font-style: italic; color: var(--text); }
 
-  #results { display: none; max-width: 800px; margin: 0 auto; padding: 0 20px; }
-  .results-header {
-    background: var(--white); border-radius: 14px;
-    padding: 32px 36px; margin: 28px 0;
-    box-shadow: 0 2px 16px rgba(26,39,68,0.07);
-    text-align: center; border-top: 4px solid var(--blue);
-  }
-  .results-header h2 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 8px; }
-  .results-header p { color: var(--gray); font-size: 14px; }
+/* ── STATUS TOAST ── */
+.toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  background: var(--navy); color: white; padding: 12px 24px;
+  border-radius: 99px; font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 20px rgba(11,47,94,0.3);
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  z-index: 1000; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+.toast.error { background: #8b1a1a; }
 
-  .score-card {
-    background: var(--white); border-radius: 14px;
-    margin-bottom: 20px; overflow: hidden;
-    box-shadow: 0 2px 16px rgba(26,39,68,0.07);
-  }
-  .score-card-header {
-    background: var(--light); padding: 16px 28px;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-  }
-  .score-card-name { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--navy); }
-  .score-badge { padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; }
-  .score-a { background: #cce0f5; color: #0b2f5e; }
-  .score-b { background: #d6eaf8; color: #1457a0; }
-  .score-c { background: #e8f4fd; color: #2e86c9; }
-  .score-d { background: #f0f7ff; color: #3d6b99; }
+/* ── INSTRUCTOR DASHBOARD ── */
+#page-instructor { padding-bottom: 40px; }
+.instructor-login { max-width: 420px; margin: 40px auto 0; }
+.dash-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-top: 24px; margin-bottom: 4px;
+}
+.dash-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--navy); }
+.dash-subtitle { font-size: 13px; color: var(--gray); margin-top: 2px; }
 
-  .score-breakdown {
-    padding: 20px 28px; display: grid;
-    grid-template-columns: 1fr 1fr; gap: 10px;
-  }
-  .breakdown-item {
-    display: flex; justify-content: space-between;
-    align-items: center; font-size: 13px; padding: 6px 0;
-    border-bottom: 1px solid #f0f4f9;
-  }
-  .breakdown-label { color: var(--gray); }
-  .breakdown-val { font-weight: 600; color: var(--text); }
-  .total-row {
-    grid-column: 1/-1; border-bottom: none;
-    border-top: 2px solid var(--border); padding-top: 12px;
-    margin-top: 4px; font-weight: 700; font-size: 15px;
-  }
-  .total-row .breakdown-label { color: var(--navy); }
-  .total-row .breakdown-val { color: var(--blue); font-size: 18px; }
+/* Summary table */
+.summary-table-wrap { overflow-x: auto; margin-top: 16px; }
+table.dash-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; background: white;
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 2px 14px rgba(11,47,94,0.07);
+}
+.dash-table th {
+  background: var(--navy); color: white;
+  padding: 10px 14px; text-align: left; font-size: 11px;
+  font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  white-space: nowrap;
+}
+.dash-table td { padding: 10px 14px; border-bottom: 1px solid #eaf2fb; vertical-align: top; }
+.dash-table tr:last-child td { border-bottom: none; }
+.dash-table tr:nth-child(even) td { background: #f5faff; }
+.avg-pill {
+  display: inline-block; padding: 2px 9px; border-radius: 99px;
+  font-size: 11px; font-weight: 700;
+}
 
-  .comment-preview { padding: 0 28px 20px; }
-  .comment-preview details { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-  .comment-preview summary {
-    padding: 10px 16px; font-size: 12px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray);
-    cursor: pointer; background: #f8fafd; user-select: none;
-  }
-  .comment-preview summary:hover { background: var(--light); }
-  .comment-text { padding: 14px 16px; font-size: 13px; color: var(--text); line-height: 1.6; font-style: italic; }
+/* Individual submissions accordion */
+.submissions-list { margin-top: 8px; }
+.submission-item {
+  background: white; border-radius: 12px; margin-top: 14px;
+  overflow: hidden; box-shadow: 0 2px 12px rgba(11,47,94,0.06);
+}
+.submission-toggle {
+  width: 100%; background: var(--light); border: none;
+  padding: 14px 20px; text-align: left; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--navy);
+  border-radius: 12px; transition: background 0.15s;
+}
+.submission-toggle:hover { background: #c8e0f0; }
+.submission-toggle.open { border-radius: 12px 12px 0 0; }
+.submission-body { display: none; padding: 18px 20px; border-top: 1px solid var(--border); }
+.submission-body.open { display: block; }
+.sub-member-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid #eaf2fb; font-size: 13px; gap: 8px; flex-wrap: wrap;
+}
+.sub-member-row:last-child { border-bottom: none; }
+.sub-scores { display: flex; gap: 6px; flex-wrap: wrap; }
+.sub-score-chip {
+  background: var(--light); border-radius: 5px;
+  padding: 2px 7px; font-size: 11px; font-weight: 600; color: var(--blue);
+  white-space: nowrap;
+}
+.sub-comment { font-size: 12px; font-style: italic; color: var(--gray); margin-top: 4px; }
+.no-data {
+  text-align: center; padding: 60px 20px;
+  color: var(--gray); font-size: 14px;
+}
+.no-data .icon { font-size: 36px; margin-bottom: 12px; }
 
-  .btn-print {
-    display: block; margin: 0 auto 16px; padding: 12px 36px;
-    background: var(--navy); color: white; border: none; border-radius: 9px;
-    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
-    cursor: pointer; transition: background 0.2s;
-  }
-  .btn-print:hover { background: var(--blue); }
+.section-divider {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px; color: var(--navy);
+  margin-top: 32px; margin-bottom: 4px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.count-badge {
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+  color: white; background: var(--blue); border-radius: 99px; padding: 2px 10px;
+}
+.loading-spinner {
+  text-align: center; padding: 40px;
+  color: var(--gray); font-size: 14px;
+}
+.refresh-btn {
+  background: var(--light); border: 1.5px solid var(--border); color: var(--blue);
+  padding: 7px 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.15s;
+}
+.refresh-btn:hover { background: #c8e0f0; }
 
-  .req { color: #c0392b; }
-  .required-note { font-size: 12px; color: var(--gray); margin-top: 16px; text-align: center; }
-
-  @media (max-width: 600px) {
-    .site-header { padding: 28px 20px; }
-    .card, .questions-body, .final-body { padding: 20px; }
-    .member-header { padding: 16px 20px; }
-    .score-breakdown { grid-template-columns: 1fr; }
-    .field-row { grid-template-columns: 1fr; }
-    .score-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-  }
-
-  /* ── PRINT PDF STYLES ── */
-  .pdf-only { display: none; }
-
-  @media print {
-    @page { size: letter; margin: 0.7in 0.75in; }
-
-    body { background: white !important; padding: 0 !important; font-size: 11pt; }
-    .site-header, .setup-card, #survey-form { display: none !important; }
-    .btn-print, .btn-reset { display: none !important; }
-
-    #results {
-      display: block !important;
-      padding: 0 !important;
-      max-width: none !important;
-    }
-
-    /* Print-only PDF header */
-    .pdf-only { display: block !important; }
-    .pdf-header {
-      border-bottom: 3pt solid #1a2744;
-      padding-bottom: 10pt;
-      margin-bottom: 16pt;
-    }
-    .pdf-header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-    .pdf-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 20pt;
-      color: #1a2744;
-      line-height: 1.1;
-    }
-    .pdf-subtitle {
-      font-size: 9pt;
-      color: #6b7a8d;
-      margin-top: 3pt;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    .pdf-meta-box {
-      border: 1pt solid #d0dce9;
-      border-radius: 4pt;
-      padding: 7pt 12pt;
-      font-size: 9pt;
-      color: #1e2d3d;
-      text-align: right;
-      line-height: 1.7;
-    }
-    .pdf-meta-label { color: #6b7a8d; font-weight: 600; }
-
-    .pdf-instructions {
-      background: #fff8e8;
-      border: 1pt solid #e8a838;
-      border-radius: 4pt;
-      padding: 8pt 12pt;
-      font-size: 8.5pt;
-      color: #5a3e00;
-      margin-bottom: 14pt;
-      line-height: 1.5;
-    }
-    .pdf-instructions strong { color: #1a2744; }
-
-    /* Hide screen-only results header */
-    .results-header { display: none !important; }
-
-    /* Score cards for print */
-    .score-card {
-      box-shadow: none !important;
-      border: 1pt solid #d0dce9 !important;
-      border-radius: 4pt !important;
-      break-inside: avoid;
-      margin-bottom: 12pt !important;
-      page-break-inside: avoid;
-    }
-    .score-card-header {
-      background: #eef5fb !important;
-      padding: 8pt 14pt !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .score-card-name { font-size: 13pt !important; }
-    .score-badge {
-      font-size: 9pt !important;
-      padding: 3pt 9pt !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .score-a { background: #cce0f5 !important; color: #0b2f5e !important; }
-    .score-b { background: #d6eaf8 !important; color: #1457a0 !important; }
-    .score-c { background: #e8f4fd !important; color: #2e86c9 !important; }
-    .score-d { background: #f0f7ff !important; color: #3d6b99 !important; }
-
-    .score-breakdown {
-      padding: 10pt 14pt !important;
-      gap: 6pt !important;
-    }
-    .breakdown-item { font-size: 9pt !important; padding: 4pt 0 !important; }
-    .total-row { font-size: 11pt !important; }
-    .total-row .breakdown-val { font-size: 13pt !important; }
-
-    /* Always show comments fully expanded in print */
-    .comment-preview { padding: 0 14pt 10pt !important; }
-    .comment-preview details { border: 1pt solid #d0dce9 !important; border-radius: 3pt !important; }
-    .comment-preview details[open] summary::after,
-    .comment-preview details summary::after { content: '' !important; }
-    .comment-preview summary {
-      background: #f0f4f9 !important;
-      font-size: 8pt !important;
-      padding: 5pt 10pt !important;
-      pointer-events: none;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .comment-text {
-      padding: 8pt 10pt !important;
-      font-size: 9pt !important;
-      display: block !important;
-    }
-
-    /* Force details open in print */
-    details { display: block !important; }
-    details > *:not(summary) { display: block !important; }
-
-    /* PDF score summary table */
-    .pdf-summary-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 14pt;
-      font-size: 9pt;
-    }
-    .pdf-summary-table th {
-      background: #1a2744 !important;
-      color: white !important;
-      padding: 6pt 10pt;
-      text-align: left;
-      font-weight: 600;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .pdf-summary-table td {
-      padding: 5pt 10pt;
-      border-bottom: 0.5pt solid #d0dce9;
-    }
-    .pdf-summary-table tr:nth-child(even) td {
-      background: #f7fafd !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .pdf-section-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 12pt;
-      color: #1a2744;
-      margin: 14pt 0 8pt;
-      border-bottom: 0.5pt solid #d0dce9;
-      padding-bottom: 4pt;
-    }
-  }
+@media (max-width: 600px) {
+  .site-header { padding: 24px 16px 20px; }
+  .card, .questions-body, .final-body { padding: 18px; }
+  .member-header { padding: 14px 18px; }
+  .score-breakdown { grid-template-columns: 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+  .tab-btn { padding: 10px 16px; font-size: 12px; }
+  .score-card-header { flex-direction: column; align-items: flex-start; }
+}
 </style>
 </head>
 <body>
 
+<!-- ═══════ HEADER ═══════ -->
 <div class="site-header">
   <div class="header-inner">
     <div class="header-label">ART104 · Group Project</div>
     <h1>Peer Evaluation Survey</h1>
     <p>Rate each member of your group — including yourself — on participation, communication, and contribution.</p>
   </div>
-</div>
-
-<div class="setup-card" style="margin-bottom:0;padding-bottom:0">
-  <div class="card" style="border-left: 4px solid var(--sky); background: linear-gradient(135deg, #e4f0fb 0%, #d6eaf8 100%);">
-    <div style="display:flex;align-items:flex-start;gap:14px;">
-      <div style="font-size:22px;flex-shrink:0;margin-top:2px">🤝</div>
-      <div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:8px">Our Goal</div>
-        <p style="font-size:14px;line-height:1.75;color:var(--text);">The goal of this survey is to make collaboration a process that genuinely involves everyone's ideas and work. Your responses to this survey help me to support you in this process.</p>
-      </div>
+  <div class="header-inner" style="margin-top:0">
+    <div class="tab-bar" style="margin:0;padding:0;max-width:none">
+      <button class="tab-btn active" onclick="switchTab('survey')">Student Survey</button>
+      <button class="tab-btn" onclick="switchTab('instructor')">Instructor Dashboard</button>
     </div>
   </div>
 </div>
 
-<div class="setup-card" style="margin-bottom:0;padding-bottom:0">
-  <div class="card" style="border-left: 4px solid var(--sky); background: linear-gradient(135deg, #f0f7ff 0%, #e4f0fb 100%);">
-    <div style="display:flex;align-items:flex-start;gap:14px;">
-      <div style="font-size:22px;flex-shrink:0;margin-top:2px">📋</div>
+<!-- ═══════ STUDENT SURVEY PAGE ═══════ -->
+<div id="page-survey" class="page active">
+
+  <!-- Goal card -->
+  <div class="info-card goal" style="margin-top:24px">
+    <div class="info-inner">
+      <div class="info-icon">🤝</div>
       <div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:8px">A note from your instructor</div>
-        <p style="font-size:14px;line-height:1.75;color:var(--text);">The grades indicated on the final PDF will not be your grades for participation for this module. They are only used as a reference for me to get a sense of the variation in participation levels. If there are significant issues that are showing up in these evaluations, then this could impact your grade for the Module. The bottom line is, let's find a way to work cooperatively together and not at the last minute <span style="color:var(--blue)">— even though I am fully aware of this tendency for creatives 🙂</span></p>
+        <div class="info-label">Our Goal</div>
+        <div class="info-text">The goal of this survey is to make collaboration a process that genuinely involves everyone's ideas and work. Your responses to this survey help me to support you in this process.</div>
       </div>
+    </div>
+  </div>
+
+  <!-- Note card -->
+  <div class="info-card note">
+    <div class="info-inner">
+      <div class="info-icon">📋</div>
+      <div>
+        <div class="info-label">A note from your instructor</div>
+        <div class="info-text">The grades indicated on the final PDF will not be your grades for participation for this module. They are only used as a reference for me to get a sense of the variation in participation levels. If there are significant issues that are showing up in these evaluations, then this could impact your grade for the Module. The bottom line is, let's find a way to work cooperatively together and not at the last minute <span style="color:var(--blue)">— even though I am fully aware of this tendency for creatives 🙂</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Setup form -->
+  <div id="setup-section">
+    <div class="card">
+      <div class="card-title"><span class="step-dot">1</span>Set Up Your Evaluation</div>
+      <div class="field-row">
+        <div>
+          <label>First Name &amp; Last Initial <span class="req">*</span></label>
+          <input type="text" id="your-name" placeholder="e.g. Jordan T.">
+        </div>
+        <div>
+          <label>Course &amp; Module</label>
+          <input type="text" id="course-name" placeholder="e.g. ART104 – Module 3">
+        </div>
+      </div>
+      <div class="field-row full">
+        <div>
+          <label>Number of Group Members (including yourself) <span class="req">*</span></label>
+          <select id="group-size" onchange="updateMemberFields()">
+            <option value="">— Select —</option>
+            <option value="2">2 members</option>
+            <option value="3">3 members</option>
+            <option value="4">4 members</option>
+          </select>
+        </div>
+      </div>
+      <div id="member-names-wrap" style="display:none">
+        <label>Group Member Names <span class="req">*</span></label>
+        <div class="member-names-grid" id="member-names-grid"></div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="generateSurvey()">Generate My Survey →</button>
+      <p class="required-note"><span class="req">*</span> Required fields</p>
+    </div>
+  </div>
+
+  <!-- Survey form -->
+  <div id="survey-form" style="display:none">
+    <div class="progress-bar-wrap">
+      <div class="progress-info">
+        <span id="progress-label">0 of 0 answered</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div id="member-sections"></div>
+    <div class="final-section">
+      <div class="final-header">
+        <span style="font-size:20px">💬</span>
+        <h3>Overall Group Experience</h3>
+      </div>
+      <div class="final-body">
+        <div class="question-block" style="border:none;margin:0;padding:0">
+          <div class="question-number">Final Question · Optional</div>
+          <div class="question-label">Is there anything else about your group's collaboration you'd like your instructor to know?</div>
+          <textarea id="overall-comments" placeholder="Share any additional context here…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:22px">
+      <button class="btn btn-submit" onclick="submitSurvey()">Submit Evaluation ✓</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results-section" style="display:none">
+    <div class="results-banner">
+      <div style="font-size:38px;margin-bottom:10px">✅</div>
+      <h2>Evaluation Submitted!</h2>
+      <p id="results-meta"></p>
+      <div class="firebase-badge">🔥 Saved to Firebase · Your instructor can now see your responses</div>
+    </div>
+    <div id="score-cards"></div>
+    <div class="btn-row" style="margin-top:20px">
+      <button class="btn btn-primary" onclick="printPDF()">🖨 Save as PDF</button>
+      <button class="btn btn-secondary" onclick="resetForm()">↩ Start Over</button>
     </div>
   </div>
 </div>
 
-<div class="setup-card" id="setup-section">
-  <div class="card">
-    <div class="card-title">
-      <span class="step-dot">1</span>
-      Set Up Your Evaluation
-    </div>
-    <div class="field-row">
-      <div>
-        <label>First Name &amp; Last Initial <span class="req">*</span></label>
-        <input type="text" id="your-name" placeholder="e.g. Jordan T.">
+<!-- ═══════ INSTRUCTOR DASHBOARD PAGE ═══════ -->
+<div id="page-instructor" class="page">
+  <!-- Login -->
+  <div id="instructor-login" class="instructor-login">
+    <div class="card">
+      <div class="card-title"><span class="step-dot">🔒</span>Instructor Access</div>
+      <div class="field-row full">
+        <div>
+          <label>Password</label>
+          <input type="password" id="instructor-password" placeholder="Enter instructor password" onkeydown="if(event.key==='Enter')instructorLogin()">
+        </div>
       </div>
+      <button class="btn btn-primary btn-full" onclick="instructorLogin()">Access Dashboard →</button>
+      <p class="required-note" style="margin-top:10px">
+        Default password: <strong>art104instructor</strong><br>
+        <span style="font-size:11px">(Change this in the code — search for INSTRUCTOR_PASSWORD)</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="instructor-dashboard" style="display:none">
+    <div class="dash-header" style="margin-top:28px">
       <div>
-        <label>Course &amp; Module</label>
-        <input type="text" id="course-name" placeholder="e.g. ART104 – Module 3">
+        <div class="dash-title">Instructor Dashboard</div>
+        <div class="dash-subtitle" id="dash-subtitle">Loading submissions…</div>
       </div>
+      <button class="refresh-btn" onclick="loadDashboard()">↻ Refresh</button>
     </div>
-    <div class="field-row full">
-      <div>
-        <label>Number of Group Members (including yourself) <span class="req">*</span></label>
-        <select id="group-size" onchange="updateMemberFields()">
-          <option value="">— Select —</option>
-          <option value="2">2 members</option>
-          <option value="3">3 members</option>
-          <option value="4">4 members</option>
-        </select>
-      </div>
+
+    <!-- Aggregated averages -->
+    <div class="section-divider">
+      Aggregated Averages by Student
+      <span class="count-badge" id="unique-students-count">—</span>
     </div>
-    <div id="member-names-wrap" style="display:none;">
-      <label>Group Member Names <span class="req">*</span></label>
-      <div class="member-names-grid" id="member-names-grid"></div>
+    <div class="summary-table-wrap">
+      <table class="dash-table" id="averages-table">
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Timeliness</th>
+            <th>Quality</th>
+            <th>Communication</th>
+            <th>Ownership</th>
+            <th>Collaboration</th>
+            <th>Avg Total</th>
+            <th>Evaluations</th>
+          </tr>
+        </thead>
+        <tbody id="averages-body">
+          <tr><td colspan="8" class="loading-spinner">Loading…</td></tr>
+        </tbody>
+      </table>
     </div>
-    <button class="btn-generate" onclick="generateSurvey()">Generate My Survey →</button>
-    <p class="required-note"><span class="req">*</span> Required fields</p>
+
+    <!-- Individual submissions -->
+    <div class="section-divider" style="margin-top:36px">
+      All Submissions
+      <span class="count-badge" id="total-submissions-count">—</span>
+    </div>
+    <div id="submissions-list" class="submissions-list">
+      <div class="loading-spinner"><div class="icon">⏳</div>Loading submissions…</div>
+    </div>
+
+    <div style="text-align:center;margin-top:28px">
+      <button class="btn btn-secondary" onclick="instructorLogout()">Log Out</button>
+    </div>
   </div>
 </div>
 
-<div id="survey-form">
-  <div class="progress-bar-wrap">
-    <div class="progress-info">
-      <span id="progress-label">0 of 0 questions answered</span>
-      <span id="progress-pct">0%</span>
-    </div>
-    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-  </div>
-  <div id="member-sections"></div>
-  <div class="final-section">
-    <div class="final-header">
-      <span style="font-size:22px">💬</span>
-      <h3>Overall Group Experience</h3>
-    </div>
-    <div class="final-body">
-      <div class="question-block" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
-        <div class="question-number">Final Question · Optional</div>
-        <div class="question-label">Is there anything else about your group's collaboration you'd like your instructor to know? This may include concerns, challenges, or highlights the questions above didn't capture.</div>
-        <textarea id="overall-comments" placeholder="Share any additional context here…"></textarea>
-      </div>
-    </div>
-  </div>
-  <div class="submit-wrap">
-    <button class="btn-submit" onclick="submitSurvey()">Submit Evaluation ✓</button>
-  </div>
-</div>
+<!-- Toast -->
+<div id="toast" class="toast"></div>
 
-<div id="results">
-
-  <!-- Screen confirmation banner -->
-  <div class="results-header">
-    <div style="font-size:40px;margin-bottom:12px">✅</div>
-    <h2>Evaluation Complete</h2>
-    <p id="results-meta"></p>
-    <p style="margin-top:10px;font-size:13px;color:var(--blue);font-weight:500">Save this page as a PDF and submit it to your instructor.</p>
-  </div>
-
-  <!-- PDF-only header (hidden on screen, shown when printing) -->
-  <div class="pdf-only pdf-header">
-    <div class="pdf-header-top">
-      <div>
-        <div class="pdf-title">Peer Evaluation — Instructor Copy</div>
-        <div class="pdf-subtitle">Group Project Participation Survey</div>
-      </div>
-      <div class="pdf-meta-box" id="pdf-meta-box">
-        <!-- filled by JS -->
-      </div>
-    </div>
-  </div>
-
-  <!-- PDF-only submission instructions -->
-  <div class="pdf-only pdf-instructions" style="background:#d6eaf8;border-color:#2e86c9;margin-bottom:8pt;">
-    <strong>Our Goal:</strong> The goal of this survey is to make collaboration a process that genuinely involves everyone's ideas and work. Your responses to this survey help me to support you in this process.
-  </div>
-  <div class="pdf-only pdf-instructions" style="background:#e8f4fd;border-color:#2e86c9;margin-bottom:8pt;">
-    <strong>Note from your instructor:</strong> The grades indicated on this PDF will not be your grades for participation for this module. They are only used as a reference to get a sense of the variation in participation levels. If there are significant issues showing up in these evaluations, then this could impact your grade for the Module. The bottom line is, let's find a way to work cooperatively together and not at the last minute — even though I am fully aware of this tendency for creatives 🙂
-  </div>
-  <div class="pdf-only pdf-instructions">
-    <strong>Submission instructions:</strong> Save this page as a PDF (Print → Save as PDF) and upload it to the course assignment portal. This document contains your full peer evaluation including scores and comments for each group member.
-  </div>
-
-  <!-- PDF-only score summary table -->
-  <div class="pdf-only">
-    <div class="pdf-section-title">Score Summary</div>
-    <table class="pdf-summary-table" id="pdf-summary-table">
-      <thead>
-        <tr>
-          <th>Member</th>
-          <th>Timeliness</th>
-          <th>Quality</th>
-          <th>Communication</th>
-          <th>Ownership</th>
-          <th>Collaboration</th>
-          <th>Total / 20</th>
-          <th>Grade</th>
-        </tr>
-      </thead>
-      <tbody id="pdf-summary-body"></tbody>
-    </table>
-    <div class="pdf-section-title">Detailed Evaluations</div>
-  </div>
-
-  <div id="score-cards"></div>
-
-  <!-- Screen buttons -->
-  <div style="text-align:center;padding:8px 0 20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-    <button class="btn-print" onclick="printPDF()">🖨 Save as PDF to Submit</button>
-    <button class="btn-reset" onclick="resetForm()" style="padding:12px 28px;background:white;color:var(--navy);border:2px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer">↩ Start Over</button>
-  </div>
-</div>
-
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════ -->
 <script>
+
+// ── CHANGE THIS PASSWORD ──
+const INSTRUCTOR_PASSWORD = 'art104instructor';
+
+// ── CRITERIA ──
 const CRITERIA = [
   {
     id: 'timeliness', title: 'Timeliness',
     question: (name, isSelf) => `How consistently did ${isSelf ? 'you' : name} complete tasks on time, without waiting until the last minute?`,
     choices: [
-      { label: 'Excellent', desc: 'Consistently contributed early; met all internal deadlines without prompting', score: 4 },
-      { label: 'Good', desc: 'Usually on time; minor delays that didn\'t significantly affect the group', score: 3 },
-      { label: 'Developing', desc: 'Occasionally late; the group had to adjust or compensate at times', score: 2 },
-      { label: 'Insufficient', desc: 'Frequently delayed or contributed mostly at the last minute', score: 1 },
+      { label: 'Excellent',    desc: 'Consistently contributed early; met all internal deadlines without prompting', score: 4 },
+      { label: 'Good',         desc: "Usually on time; minor delays that didn't significantly affect the group",     score: 3 },
+      { label: 'Developing',   desc: 'Occasionally late; the group had to adjust or compensate at times',           score: 2 },
+      { label: 'Insufficient', desc: 'Frequently delayed or contributed mostly at the last minute',                 score: 1 },
     ]
   },
   {
     id: 'quality', title: 'Quality of Contributions',
-    question: (name, isSelf) => `How would you rate the quality of ${isSelf ? 'your' : name + '\'s'} contributions to the project?`,
+    question: (name, isSelf) => `How would you rate the quality of ${isSelf ? 'your' : name + "'s"} contributions to the project?`,
     choices: [
-      { label: 'Excellent', desc: 'Work was thorough, well-prepared, and elevated the overall project', score: 4 },
-      { label: 'Good', desc: 'Solid contributions with only minor gaps or areas needing polish', score: 3 },
-      { label: 'Developing', desc: 'Contributions were present but surface-level or incomplete', score: 2 },
-      { label: 'Insufficient', desc: 'Minimal contributions or work that required significant revision by others', score: 1 },
+      { label: 'Excellent',    desc: 'Work was thorough, well-prepared, and elevated the overall project',             score: 4 },
+      { label: 'Good',         desc: 'Solid contributions with only minor gaps or areas needing polish',               score: 3 },
+      { label: 'Developing',   desc: 'Contributions were present but surface-level or incomplete',                     score: 2 },
+      { label: 'Insufficient', desc: 'Minimal contributions or work that required significant revision by others',     score: 1 },
     ]
   },
   {
-    id: 'communication', title: 'Communication & Responsiveness',
+    id: 'communication', title: 'Communication',
     question: (name, isSelf) => `How well did ${isSelf ? 'you' : name} communicate and respond to the group throughout the project?`,
     choices: [
-      { label: 'Excellent', desc: 'Responded promptly and proactively shared updates without being asked', score: 4 },
-      { label: 'Good', desc: 'Communicated adequately and responded within a reasonable timeframe', score: 3 },
-      { label: 'Developing', desc: 'Communication was inconsistent; sometimes difficult to reach', score: 2 },
-      { label: 'Insufficient', desc: 'Rarely communicated; the group had to follow up repeatedly', score: 1 },
+      { label: 'Excellent',    desc: 'Responded promptly and proactively shared updates without being asked', score: 4 },
+      { label: 'Good',         desc: 'Communicated adequately and responded within a reasonable timeframe',   score: 3 },
+      { label: 'Developing',   desc: 'Communication was inconsistent; sometimes difficult to reach',          score: 2 },
+      { label: 'Insufficient', desc: 'Rarely communicated; the group had to follow up repeatedly',            score: 1 },
     ]
   },
   {
     id: 'ownership', title: 'Ownership & Proactivity',
     question: (name, isSelf) => `How well did ${isSelf ? 'you' : name} take ownership of ${isSelf ? 'your' : 'their'} part of the project and act proactively without needing to be asked?`,
     choices: [
-      { label: 'Excellent', desc: 'Took clear ownership of their tasks; anticipated needs and acted without prompting', score: 4 },
-      { label: 'Good', desc: 'Generally self-directed; occasionally needed a nudge but followed through well', score: 3 },
-      { label: 'Developing', desc: 'Completed tasks when reminded but rarely showed initiative or took ownership', score: 2 },
-      { label: 'Insufficient', desc: 'Did not take ownership; relied on others to assign, remind, or redo their work', score: 1 },
+      { label: 'Excellent',    desc: 'Took clear ownership; anticipated needs and acted without prompting',        score: 4 },
+      { label: 'Good',         desc: 'Generally self-directed; occasionally needed a nudge but followed through',  score: 3 },
+      { label: 'Developing',   desc: 'Completed tasks when reminded but rarely showed initiative',                 score: 2 },
+      { label: 'Insufficient', desc: 'Relied on others to assign, remind, or redo their work',                    score: 1 },
     ]
   },
   {
-    id: 'collaboration', title: 'Collaboration & Team Support',
+    id: 'collaboration', title: 'Collaboration',
     question: (name, isSelf) => `How well did ${isSelf ? 'you' : name} support and collaborate with the rest of the group?`,
     choices: [
-      { label: 'Excellent', desc: 'Actively supported teammates; helped problem-solve and step in where needed', score: 4 },
-      { label: 'Good', desc: 'Generally cooperative, reliable, and helpful when asked', score: 3 },
-      { label: 'Developing', desc: 'Participated when asked but rarely volunteered support', score: 2 },
-      { label: 'Insufficient', desc: 'Did not meaningfully support teammates; may have created friction or delays', score: 1 },
+      { label: 'Excellent',    desc: 'Actively supported teammates; helped problem-solve and step in where needed', score: 4 },
+      { label: 'Good',         desc: 'Generally cooperative, reliable, and helpful when asked',                     score: 3 },
+      { label: 'Developing',   desc: 'Participated when asked but rarely volunteered support',                      score: 2 },
+      { label: 'Insufficient', desc: 'Did not meaningfully support teammates; may have created friction',           score: 1 },
     ]
   },
 ];
 
+const LABEL_MAP = { 4: 'Excellent', 3: 'Good', 2: 'Developing', 1: 'Insufficient' };
+
+function gradeFor(total) {
+  if (total >= 18) return { label: 'A — Excellent',     cls: 'score-a' };
+  if (total >= 14) return { label: 'B — Good',          cls: 'score-b' };
+  if (total >= 10) return { label: 'C — Developing',    cls: 'score-c' };
+  return             { label: 'D/F — Insufficient', cls: 'score-d' };
+}
+
+// ── TAB SWITCHING ──
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── TOAST ──
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 3200);
+}
+
+// ── SETUP FORM ──
 let members = [];
 
 function updateMemberFields() {
@@ -783,18 +774,14 @@ function updateMemberFields() {
     badge.className = 'member-badge';
     badge.textContent = String.fromCharCode(65 + i);
     const inp = document.createElement('input');
-    inp.type = 'text';
-    inp.id = `member-${i}`;
-    inp.placeholder = i === 0 ? 'e.g. Jordan T.' : `e.g. Alex M.`;
+    inp.type = 'text'; inp.id = `member-${i}`;
+    inp.placeholder = i === 0 ? 'e.g. Jordan T.' : 'e.g. Alex M.';
     if (i === 0) {
       inp.addEventListener('input', () => { document.getElementById('your-name').value = inp.value; });
       const tag = document.createElement('span');
-      tag.className = 'you-tag';
-      tag.textContent = 'You';
+      tag.className = 'you-tag'; tag.textContent = 'You';
       row.append(badge, inp, tag);
-    } else {
-      row.append(badge, inp);
-    }
+    } else { row.append(badge, inp); }
     grid.appendChild(row);
   }
   const yn = document.getElementById('your-name').value;
@@ -804,12 +791,12 @@ function updateMemberFields() {
 function generateSurvey() {
   const yourName = document.getElementById('your-name').value.trim();
   const size = parseInt(document.getElementById('group-size').value);
-  if (!yourName) { alert('Please enter your name.'); return; }
-  if (!size) { alert('Please select the number of group members.'); return; }
+  if (!yourName) { showToast('Please enter your name.', true); return; }
+  if (!size) { showToast('Please select the number of group members.', true); return; }
   members = [];
   for (let i = 0; i < size; i++) {
-    const val = (document.getElementById(`member-${i}`) || {}).value?.trim() || '';
-    if (!val) { alert(`Please enter a name for Member ${i + 1}.`); return; }
+    const val = document.getElementById(`member-${i}`)?.value?.trim() || '';
+    if (!val) { showToast(`Please enter a name for Member ${i + 1}.`, true); return; }
     members.push({ name: val, isSelf: i === 0 });
   }
   buildSurvey();
@@ -819,6 +806,7 @@ function generateSurvey() {
   updateProgress();
 }
 
+// ── BUILD SURVEY ──
 function buildSurvey() {
   const container = document.getElementById('member-sections');
   container.innerHTML = '';
@@ -843,12 +831,11 @@ function buildSurvey() {
       const block = document.createElement('div');
       block.className = 'question-block';
       block.innerHTML = `
-        <div class="question-number">Question ${ci + 1} · ${crit.title}</div>
+        <div class="question-number">Q${ci + 1} · ${crit.title}</div>
         <div class="question-label">${crit.question(member.name, member.isSelf)}</div>
         <div class="choices" id="choices-${mi}-${ci}"></div>
       `;
       qBody.appendChild(block);
-
       const choicesEl = block.querySelector(`#choices-${mi}-${ci}`);
       crit.choices.forEach(ch => {
         const opt = document.createElement('div');
@@ -871,21 +858,20 @@ function buildSurvey() {
       });
     });
 
-    // One comment box per member
-    const commentBlock = document.createElement('div');
-    commentBlock.className = 'question-block';
-    commentBlock.style.borderBottom = 'none';
-    commentBlock.style.marginBottom = '0';
-    commentBlock.style.paddingBottom = '0';
-    commentBlock.innerHTML = `
+    // Comment box
+    const cb = document.createElement('div');
+    cb.className = 'question-block';
+    cb.style.cssText = 'border:none;margin:0;padding:0';
+    cb.innerHTML = `
       <div class="question-number">Comments · Optional</div>
-      <div class="question-label">Share any additional comments about ${member.isSelf ? 'your own' : member.name + "'s"} participation. What went well? Anything to improve?</div>
+      <div class="question-label">Any additional comments about ${member.isSelf ? 'your own' : member.name + "'s"} participation?</div>
       <textarea id="comment-${mi}" placeholder="3–5 sentences is great…"></textarea>
     `;
-    qBody.appendChild(commentBlock);
+    qBody.appendChild(cb);
   });
 }
 
+// ── PROGRESS ──
 function updateProgress() {
   let answered = 0;
   const total = members.length * CRITERIA.length;
@@ -897,68 +883,93 @@ function updateProgress() {
   const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('progress-pct').textContent = pct + '%';
-  document.getElementById('progress-label').textContent = `${answered} of ${total} questions answered`;
+  document.getElementById('progress-label').textContent = `${answered} of ${total} answered`;
 }
 
-function submitSurvey() {
+// ── SUBMIT ──
+async function submitSurvey() {
+  // Validate
   const missing = [];
   members.forEach((m, mi) => {
     CRITERIA.forEach((c, ci) => {
-      if (!document.querySelector(`#choices-${mi}-${ci} .choice-option.selected`)) {
+      if (!document.querySelector(`#choices-${mi}-${ci} .choice-option.selected`))
         missing.push(`${m.name} — ${c.title}`);
-      }
     });
   });
   if (missing.length > 0) {
-    alert(`Please answer all required questions before submitting.\n\nMissing:\n• ${missing.slice(0, 5).join('\n• ')}${missing.length > 5 ? `\n…and ${missing.length - 5} more` : ''}`);
+    showToast(`Please answer all questions first (${missing.length} remaining)`, true);
     return;
   }
 
+  // Build submission data
+  const course = document.getElementById('course-name').value.trim();
+  const submitter = members[0].name;
+  const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  const evaluations = members.map((member, mi) => {
+    const scores = {};
+    let total = 0;
+    CRITERIA.forEach((crit, ci) => {
+      const val = parseInt(document.querySelector(`#choices-${mi}-${ci} .choice-option.selected`).dataset.score);
+      scores[crit.id] = val;
+      total += val;
+    });
+    return {
+      memberName: member.name,
+      isSelf: member.isSelf,
+      scores,
+      total,
+      comment: document.getElementById(`comment-${mi}`)?.value.trim() || ''
+    };
+  });
+
+  const submission = {
+    submitter,
+    course,
+    dateStr,
+    evaluations,
+    overallComment: document.getElementById('overall-comments').value.trim(),
+    submittedAt: window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString()
+  };
+
+  // Save to Firebase (or fall back to local-only if not configured)
+  let savedToFirebase = false;
+  if (window._firebaseReady && window._db) {
+    try {
+      await window._addDoc(window._collection(window._db, 'evaluations'), submission);
+      savedToFirebase = true;
+      showToast('✓ Saved to Firebase successfully!');
+    } catch (e) {
+      console.error('Firebase save error:', e);
+      showToast('Firebase save failed — check your config. Results shown below.', true);
+    }
+  } else {
+    showToast('Firebase not configured — showing local results only.', true);
+  }
+
+  // Render results
+  renderResults(submission, savedToFirebase);
+}
+
+function renderResults(submission, savedToFirebase) {
+  const { submitter, course, dateStr, evaluations, overallComment } = submission;
+  document.getElementById('results-meta').textContent =
+    `${submitter}${course ? ' · ' + course : ''} · ${dateStr}`;
+
   const cards = document.getElementById('score-cards');
   cards.innerHTML = '';
-  const course = document.getElementById('course-name').value.trim();
-  const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  const submitterName = members[0].name;
-  const metaText = `Submitted by ${submitterName}${course ? ' · ' + course : ''} · ${dateStr}`;
 
-  document.getElementById('results-meta').textContent = metaText;
+  evaluations.forEach(ev => {
+    const grade = gradeFor(ev.total);
+    const breakdown = CRITERIA.map(c => ({
+      label: c.title, val: ev.scores[c.id], text: LABEL_MAP[ev.scores[c.id]]
+    }));
 
-  // Populate PDF meta box
-  document.getElementById('pdf-meta-box').innerHTML = `
-    <div><span class="pdf-meta-label">Submitted by: </span>${submitterName}</div>
-    ${course ? `<div><span class="pdf-meta-label">Course & Module: </span>${course}</div>` : ''}
-    <div><span class="pdf-meta-label">Date: </span>${dateStr}</div>
-    <div><span class="pdf-meta-label">Group size: </span>${members.length} members</div>
-  `;
-
-  const labelMap = { 4: 'Excellent', 3: 'Good', 2: 'Developing', 1: 'Insufficient' };
-  const summaryRows = [];
-
-  members.forEach((member, mi) => {
-    let total = 0;
-    const scores = [];
-    const breakdown = [];
-    CRITERIA.forEach((crit, ci) => {
-      const sel = document.querySelector(`#choices-${mi}-${ci} .choice-option.selected`);
-      const val = parseInt(sel.dataset.score);
-      total += val;
-      scores.push(val);
-      breakdown.push({ label: crit.title, val, text: labelMap[val] });
-    });
-    const comment = document.getElementById(`comment-${mi}`)?.value.trim() || '';
-    const grade = total >= 18 ? { label: 'A — Excellent', cls: 'score-a' }
-                : total >= 14 ? { label: 'B — Good', cls: 'score-b' }
-                : total >= 10 ? { label: 'C — Developing', cls: 'score-c' }
-                : { label: 'D/F — Insufficient', cls: 'score-d' };
-
-    summaryRows.push({ name: member.name, isSelf: member.isSelf, scores, total, grade });
-
-    // Detailed score card
     const card = document.createElement('div');
     card.className = 'score-card';
     card.innerHTML = `
       <div class="score-card-header">
-        <div class="score-card-name">${member.name}${member.isSelf ? ' <span style="font-size:12px;color:var(--gray);font-family:\'DM Sans\',sans-serif;font-weight:400">(Self-evaluation)</span>' : ''}</div>
+        <div class="score-card-name">${ev.memberName}${ev.isSelf ? ' <span style="font-size:12px;color:var(--gray);font-weight:400">(Self)</span>' : ''}</div>
         <span class="score-badge ${grade.cls}">${grade.label}</span>
       </div>
       <div class="score-breakdown">
@@ -969,62 +980,49 @@ function submitSurvey() {
           </div>`).join('')}
         <div class="breakdown-item total-row">
           <span class="breakdown-label">Total Score</span>
-          <span class="breakdown-val">${total} / 20</span>
+          <span class="breakdown-val">${ev.total} / 20</span>
         </div>
       </div>
-      ${comment ? `
-        <div class="comment-preview">
+      ${ev.comment ? `
+        <div class="comment-box">
           <details open>
             <summary>Comments</summary>
-            <div class="comment-text">${comment}</div>
+            <div class="comment-text">${ev.comment}</div>
           </details>
         </div>` : ''}
     `;
     cards.appendChild(card);
   });
 
-  // Populate PDF summary table
-  const tbody = document.getElementById('pdf-summary-body');
-  tbody.innerHTML = '';
-  summaryRows.forEach(row => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><strong>${row.name}</strong>${row.isSelf ? ' <em style="font-size:8pt;color:#6b7a8d">(Self)</em>' : ''}</td>
-      ${row.scores.map(s => `<td style="text-align:center">${labelMap[s]} (${s})</td>`).join('')}
-      <td style="text-align:center;font-weight:700">${row.total}</td>
-      <td style="text-align:center;font-weight:600">${row.grade.label.split('—')[0].trim()}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Overall comments card
-  const overall = document.getElementById('overall-comments').value.trim();
-  if (overall) {
-    const overallCard = document.createElement('div');
-    overallCard.className = 'score-card';
-    overallCard.innerHTML = `
+  if (overallComment) {
+    const oc = document.createElement('div');
+    oc.className = 'score-card';
+    oc.innerHTML = `
       <div class="score-card-header">
-        <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.8px">Overall Group Comments</div>
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--gray)">Overall Comments</div>
       </div>
-      <div style="padding:20px 28px;font-size:14px;line-height:1.7;font-style:italic;color:var(--text)">${overall}</div>
+      <div style="padding:18px 24px;font-size:14px;line-height:1.7;font-style:italic;color:var(--text)">${overallComment}</div>
     `;
-    cards.appendChild(overallCard);
+    cards.appendChild(oc);
   }
 
   document.getElementById('survey-form').style.display = 'none';
-  document.getElementById('results').style.display = 'block';
+  document.getElementById('results-section').style.display = 'block';
+
+  // Update Firebase badge
+  const badge = document.querySelector('.firebase-badge');
+  if (!savedToFirebase) badge.textContent = '⚠ Firebase not configured — PDF only mode';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function printPDF() {
-  // Ensure all details elements are open before printing
-  document.querySelectorAll('#results details').forEach(d => d.open = true);
+  document.querySelectorAll('#results-section details').forEach(d => d.open = true);
   window.print();
 }
 
 function resetForm() {
   if (!confirm('Start over? Your current evaluation will be lost.')) return;
-  document.getElementById('results').style.display = 'none';
+  document.getElementById('results-section').style.display = 'none';
   document.getElementById('setup-section').style.display = 'block';
   document.getElementById('your-name').value = '';
   document.getElementById('course-name').value = '';
@@ -1034,6 +1032,202 @@ function resetForm() {
   members = [];
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// ── INSTRUCTOR DASHBOARD ──
+function instructorLogin() {
+  const pw = document.getElementById('instructor-password').value;
+  if (pw === INSTRUCTOR_PASSWORD) {
+    document.getElementById('instructor-login').style.display = 'none';
+    document.getElementById('instructor-dashboard').style.display = 'block';
+    loadDashboard();
+  } else {
+    showToast('Incorrect password', true);
+    document.getElementById('instructor-password').value = '';
+  }
+}
+
+function instructorLogout() {
+  document.getElementById('instructor-dashboard').style.display = 'none';
+  document.getElementById('instructor-login').style.display = 'block';
+  document.getElementById('instructor-password').value = '';
+}
+
+async function loadDashboard() {
+  if (!window._firebaseReady || !window._db) {
+    document.getElementById('submissions-list').innerHTML =
+      '<div class="no-data"><div class="icon">⚠️</div>Firebase not configured yet.<br>Follow the setup instructions to connect your database.</div>';
+    document.getElementById('averages-body').innerHTML =
+      '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--gray)">No data — Firebase not configured</td></tr>';
+    return;
+  }
+
+  document.getElementById('submissions-list').innerHTML =
+    '<div class="loading-spinner"><div class="icon">⏳</div>Loading…</div>';
+  document.getElementById('averages-body').innerHTML =
+    '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--gray)">Loading…</td></tr>';
+
+  try {
+    const snapshot = await window._getDocs(window._collection(window._db, 'evaluations'));
+    const allDocs = [];
+    snapshot.forEach(doc => allDocs.push({ id: doc.id, ...doc.data() }));
+
+    allDocs.sort((a, b) => {
+      const ta = a.submittedAt?.seconds || 0;
+      const tb = b.submittedAt?.seconds || 0;
+      return tb - ta;
+    });
+
+    document.getElementById('dash-subtitle').textContent =
+      `${allDocs.length} submission${allDocs.length !== 1 ? 's' : ''} total`;
+    document.getElementById('total-submissions-count').textContent = allDocs.length;
+
+    renderAverages(allDocs);
+    renderSubmissions(allDocs);
+  } catch (e) {
+    console.error('Dashboard load error:', e);
+    document.getElementById('submissions-list').innerHTML =
+      `<div class="no-data"><div class="icon">❌</div>Error loading data: ${e.message}</div>`;
+  }
+}
+
+function renderAverages(docs) {
+  // Build per-student score accumulator
+  const studentMap = {};
+  docs.forEach(doc => {
+    doc.evaluations.forEach(ev => {
+      const key = ev.memberName.toLowerCase().trim();
+      if (!studentMap[key]) {
+        studentMap[key] = { name: ev.memberName, counts: {}, sums: {}, totalSum: 0, n: 0 };
+        CRITERIA.forEach(c => { studentMap[key].sums[c.id] = 0; studentMap[key].counts[c.id] = 0; });
+      }
+      CRITERIA.forEach(c => {
+        if (ev.scores[c.id] != null) {
+          studentMap[key].sums[c.id] += ev.scores[c.id];
+          studentMap[key].counts[c.id]++;
+        }
+      });
+      studentMap[key].totalSum += ev.total;
+      studentMap[key].n++;
+    });
+  });
+
+  const students = Object.values(studentMap).sort((a, b) => a.name.localeCompare(b.name));
+  document.getElementById('unique-students-count').textContent = students.length;
+
+  const tbody = document.getElementById('averages-body');
+  if (students.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray)">No submissions yet</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = students.map(s => {
+    const avgTotal = (s.totalSum / s.n).toFixed(1);
+    const grade = gradeFor(Math.round(s.totalSum / s.n));
+    const criteriaAvgs = CRITERIA.map(c => {
+      const avg = s.counts[c.id] > 0 ? (s.sums[c.id] / s.counts[c.id]).toFixed(1) : '—';
+      return `<td style="text-align:center"><span class="avg-pill ${avgPillClass(avg)}">${avg}</span></td>`;
+    }).join('');
+    return `<tr>
+      <td><strong>${s.name}</strong></td>
+      ${criteriaAvgs}
+      <td style="text-align:center"><strong>${avgTotal}</strong> / 20</td>
+      <td style="text-align:center"><span class="score-badge ${grade.cls}" style="font-size:10px;padding:2px 8px">${grade.label.split('—')[0].trim()}</span><br><span style="font-size:11px;color:var(--gray)">${s.n} eval${s.n !== 1 ? 's' : ''}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function avgPillClass(avg) {
+  const v = parseFloat(avg);
+  if (v >= 3.5) return 'score-a';
+  if (v >= 2.5) return 'score-b';
+  if (v >= 1.5) return 'score-c';
+  return 'score-d';
+}
+
+function renderSubmissions(docs) {
+  const list = document.getElementById('submissions-list');
+  if (docs.length === 0) {
+    list.innerHTML = '<div class="no-data"><div class="icon">📭</div>No submissions yet.<br>Share the survey link with your students.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  docs.forEach((doc, idx) => {
+    const dateLabel = doc.dateStr || 'Unknown date';
+    const item = document.createElement('div');
+    item.className = 'submission-item';
+
+    const memberSummary = doc.evaluations.map(ev =>
+      `${ev.memberName}${ev.isSelf ? ' (self)' : ''}: ${ev.total}/20`
+    ).join(' · ');
+
+    item.innerHTML = `
+      <button class="submission-toggle" onclick="toggleSubmission(${idx})">
+        <span>
+          <strong>${doc.submitter}</strong>
+          ${doc.course ? `<span style="color:var(--gray);font-weight:400"> · ${doc.course}</span>` : ''}
+          <span style="color:var(--gray);font-weight:400"> · ${dateLabel}</span>
+        </span>
+        <span style="font-size:11px;color:var(--gray)">${memberSummary}</span>
+      </button>
+      <div class="submission-body" id="sub-body-${idx}">
+        ${doc.evaluations.map(ev => `
+          <div class="sub-member-row">
+            <div>
+              <strong>${ev.memberName}</strong>${ev.isSelf ? ' <span style="font-size:11px;color:var(--gray)">(self)</span>' : ''}
+              <div class="sub-scores">
+                ${CRITERIA.map(c => `<span class="sub-score-chip">${c.title.split(' ')[0]}: ${LABEL_MAP[ev.scores[c.id]] || '—'} (${ev.scores[c.id]})</span>`).join('')}
+              </div>
+              ${ev.comment ? `<div class="sub-comment">"${ev.comment}"</div>` : ''}
+            </div>
+            <span class="score-badge ${gradeFor(ev.total).cls}" style="align-self:flex-start;flex-shrink:0">${ev.total}/20</span>
+          </div>`).join('')}
+        ${doc.overallComment ? `
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--gray)">Overall Comment</span>
+            <div class="sub-comment" style="margin-top:4px">"${doc.overallComment}"</div>
+          </div>` : ''}
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function toggleSubmission(idx) {
+  const body = document.getElementById(`sub-body-${idx}`);
+  const btn = body.previousElementSibling;
+  body.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+// Wait for Firebase before anything that needs it
+document.addEventListener('firebaseReady', () => {
+  console.log('Firebase ready');
+});
 </script>
+
+<!-- ═══════ PRINT STYLES ═══════ -->
+<style>
+@media print {
+  @page { size: letter; margin: 0.7in 0.75in; }
+  body { background: white !important; padding: 0 !important; }
+  .site-header, .tab-bar, #setup-section, #survey-form, .btn-row,
+  #page-instructor { display: none !important; }
+  #page-survey { display: block !important; padding: 0 !important; max-width: none !important; }
+  .info-card { display: block !important; border-radius: 4pt !important;
+    box-shadow: none !important; margin-top: 8pt !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .score-card { box-shadow: none !important; border: 1pt solid #a8cce0 !important;
+    border-radius: 4pt !important; break-inside: avoid; margin-top: 10pt !important; }
+  .score-card-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .score-a { background: #cce0f5 !important; color: #0b2f5e !important; }
+  .score-b { background: #d6eaf8 !important; color: #1457a0 !important; }
+  .score-c { background: #e8f4fd !important; color: #2e86c9 !important; }
+  .score-d { background: #f0f7ff !important; color: #3d6b99 !important; }
+  details { display: block !important; }
+  details > *:not(summary) { display: block !important; }
+  .firebase-badge { display: none !important; }
+}
+</style>
+
 </body>
 </html>
