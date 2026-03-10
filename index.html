@@ -7,16 +7,16 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --navy: #1a2744;
-    --blue: #2e5c8a;
-    --sky: #5b9fd4;
-    --light: #eef5fb;
-    --accent: #e8a838;
+    --navy: #0b2f5e;
+    --blue: #1457a0;
+    --sky: #2e86c9;
+    --light: #d6eaf8;
+    --accent: #7ec8e3;
     --white: #ffffff;
-    --gray: #6b7a8d;
-    --border: #d0dce9;
-    --success: #2d7a5f;
-    --text: #1e2d3d;
+    --gray: #3d6b99;
+    --border: #a8cce0;
+    --success: #1457a0;
+    --text: #0a2340;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -300,7 +300,7 @@
     box-shadow: 0 2px 16px rgba(26,39,68,0.07);
   }
   .final-header {
-    background: linear-gradient(135deg, #2d4a2d, #3a6b3a);
+    background: linear-gradient(135deg, #0b2f5e, #1457a0);
     padding: 20px 32px; display: flex; align-items: center; gap: 12px;
   }
   .final-header h3 { font-family: 'DM Serif Display', serif; font-size: 18px; color: white; }
@@ -308,19 +308,19 @@
 
   .submit-wrap { text-align: center; padding: 8px 0 20px; }
   .btn-submit {
-    padding: 16px 52px; background: var(--success); color: white;
+    padding: 16px 52px; background: var(--blue); color: white;
     border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif;
     font-size: 16px; font-weight: 600; cursor: pointer;
-    transition: background 0.2s; box-shadow: 0 4px 18px rgba(45,122,95,0.28);
+    transition: background 0.2s; box-shadow: 0 4px 18px rgba(20,87,160,0.28);
   }
-  .btn-submit:hover { background: #236b50; }
+  .btn-submit:hover { background: #0f4585; }
 
   #results { display: none; max-width: 800px; margin: 0 auto; padding: 0 20px; }
   .results-header {
     background: var(--white); border-radius: 14px;
     padding: 32px 36px; margin: 28px 0;
     box-shadow: 0 2px 16px rgba(26,39,68,0.07);
-    text-align: center; border-top: 4px solid var(--success);
+    text-align: center; border-top: 4px solid var(--blue);
   }
   .results-header h2 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 8px; }
   .results-header p { color: var(--gray); font-size: 14px; }
@@ -337,10 +337,10 @@
   }
   .score-card-name { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--navy); }
   .score-badge { padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; }
-  .score-a { background: #d4edda; color: #1a5c32; }
-  .score-b { background: #d4e6f7; color: #1a3f6b; }
-  .score-c { background: #fff3cd; color: #7a5300; }
-  .score-d { background: #f8d7da; color: #721c24; }
+  .score-a { background: #cce0f5; color: #0b2f5e; }
+  .score-b { background: #d6eaf8; color: #1457a0; }
+  .score-c { background: #e8f4fd; color: #2e86c9; }
+  .score-d { background: #f0f7ff; color: #3d6b99; }
 
   .score-breakdown {
     padding: 20px 28px; display: grid;
@@ -480,10 +480,10 @@
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    .score-a { background: #d4edda !important; color: #1a5c32 !important; }
-    .score-b { background: #d4e6f7 !important; color: #1a3f6b !important; }
-    .score-c { background: #fff3cd !important; color: #7a5300 !important; }
-    .score-d { background: #f8d7da !important; color: #721c24 !important; }
+    .score-a { background: #cce0f5 !important; color: #0b2f5e !important; }
+    .score-b { background: #d6eaf8 !important; color: #1457a0 !important; }
+    .score-c { background: #e8f4fd !important; color: #2e86c9 !important; }
+    .score-d { background: #f0f7ff !important; color: #3d6b99 !important; }
 
     .score-breakdown {
       padding: 10pt 14pt !important;
@@ -556,7 +556,7 @@
 
 <div class="site-header">
   <div class="header-inner">
-    <div class="header-label">University Course · Group Project</div>
+    <div class="header-label">ART104 · Group Project</div>
     <h1>Peer Evaluation Survey</h1>
     <p>Rate each member of your group — including yourself — on participation, communication, and contribution.</p>
   </div>
@@ -570,12 +570,12 @@
     </div>
     <div class="field-row">
       <div>
-        <label>Your Name <span class="req">*</span></label>
-        <input type="text" id="your-name" placeholder="First Last">
+        <label>First Name &amp; Last Initial <span class="req">*</span></label>
+        <input type="text" id="your-name" placeholder="e.g. Jordan T.">
       </div>
       <div>
-        <label>Course / Section</label>
-        <input type="text" id="course-name" placeholder="e.g. COMM 301 – Section 02">
+        <label>Course &amp; Module</label>
+        <input type="text" id="course-name" placeholder="e.g. ART104 – Module 3">
       </div>
     </div>
     <div class="field-row full">
@@ -755,7 +755,7 @@ function updateMemberFields() {
     const inp = document.createElement('input');
     inp.type = 'text';
     inp.id = `member-${i}`;
-    inp.placeholder = i === 0 ? 'Your name' : `Teammate ${i} name`;
+    inp.placeholder = i === 0 ? 'e.g. Jordan T.' : `e.g. Alex M.`;
     if (i === 0) {
       inp.addEventListener('input', () => { document.getElementById('your-name').value = inp.value; });
       const tag = document.createElement('span');
@@ -896,7 +896,7 @@ function submitSurvey() {
   // Populate PDF meta box
   document.getElementById('pdf-meta-box').innerHTML = `
     <div><span class="pdf-meta-label">Submitted by: </span>${submitterName}</div>
-    ${course ? `<div><span class="pdf-meta-label">Course: </span>${course}</div>` : ''}
+    ${course ? `<div><span class="pdf-meta-label">Course & Module: </span>${course}</div>` : ''}
     <div><span class="pdf-meta-label">Date: </span>${dateStr}</div>
     <div><span class="pdf-meta-label">Group size: </span>${members.length} members</div>
   `;
